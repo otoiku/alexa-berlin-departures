@@ -1,0 +1,5 @@
+node_modules/
+.idea/
+# Personal stop IDs - never commit
+lambda/stops.json
+# lambda/dist is intentionally committed: Alexa-hosted does not run the TypeScript build.

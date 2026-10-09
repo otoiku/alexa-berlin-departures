@@ -1,0 +1,29 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "マイバス",
+      "intents": [
+        {
+          "name": "NextBusIntent",
+          "slots": [],
+          "samples": [
+            "次のバス",
+            "次のバスは",
+            "次のバスを教えて",
+            "バスはいつ",
+            "バスはいつ来る",
+            "バスの時間",
+            "バスの時間を教えて",
+            "次のバスはいつ"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] }
+      ],
+      "types": []
+    }
+  }
+}

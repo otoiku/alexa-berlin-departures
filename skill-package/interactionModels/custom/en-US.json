@@ -1,0 +1,29 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "my bus",
+      "intents": [
+        {
+          "name": "NextBusIntent",
+          "slots": [],
+          "samples": [
+            "next bus",
+            "for the next bus",
+            "the next bus",
+            "when is the next bus",
+            "when is the bus",
+            "when does the bus come",
+            "bus times",
+            "next buses"
+          ]
+        },
+        { "name": "AMAZON.HelpIntent", "samples": [] },
+        { "name": "AMAZON.StopIntent", "samples": [] },
+        { "name": "AMAZON.CancelIntent", "samples": [] },
+        { "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+        { "name": "AMAZON.FallbackIntent", "samples": [] }
+      ],
+      "types": []
+    }
+  }
+}
