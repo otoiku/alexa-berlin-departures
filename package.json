@@ -1,5 +1,5 @@
 {
-  "name": "alexa-my-bus",
+  "name": "alexa-berlin-departures",
   "version": "1.0.0",
   "private": true,
   "description": "Alexa skill: next 3 direct buses between two configured Berlin (BVG/VBB) stops",
