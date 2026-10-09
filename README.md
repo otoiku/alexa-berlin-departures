@@ -52,6 +52,22 @@ npm run smoke     # prints the ja/en speech using the real API (needs stop IDs)
    Note: `stops.json` is git-ignored here, so it must be added explicitly to the Alexa-hosted repository (that repository is private).
 4. Enable testing in the Test tab and try "open my bus" / 「マイバスを開いて」.
 
+## Deploy with ask-cli (git push)
+One-time setup:
+```sh
+npm i -g ask-cli
+ask configure                                   # log in with your Amazon developer account
+ask init --hosted-skill-id <skill-id>           # clones the private Alexa-hosted repository
+export HOSTED_REPO_DIR=/path/to/that/clone      # e.g. in ~/.zshrc (keep personal paths out of this repo)
+```
+
+Each deploy:
+```sh
+npm run deploy                 # test, build, copy lambda/ files, commit and push
+npm run deploy -- --dry-run    # show what would change, then restore the clone
+```
+The script copies `index.js`, `package.json`, `stops.json` and `dist/` into the clone's `lambda/` and never touches its `skill-package/`. `stops.json` is committed only to the private Alexa-hosted repository.
+
 ## Routine ("Alexa, next bus")
 A custom skill cannot be launched by "next bus" alone. Create a Routine in the Alexa app:
 - When: voice, "next bus" (or 「次のバス」)
