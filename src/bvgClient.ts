@@ -1,3 +1,4 @@
+import * as https from 'node:https';
 import { getConfig } from './config';
 
 /** Subset of the transport.rest departure object we rely on. */
@@ -15,7 +16,40 @@ export interface Bus {
   minutes: number;
 }
 
-export type FetchFn = typeof fetch;
+/** GET a URL and resolve with parsed JSON. Injected in tests. */
+export type GetJson = (url: string, timeoutMs: number) => Promise<unknown>;
+
+/**
+ * Uses node:https instead of global fetch, which is missing on older
+ * Node.js runtimes (e.g. Alexa-hosted's Node 16).
+ */
+export const httpsGetJson: GetJson = (url, timeoutMs) =>
+  new Promise((resolve, reject) => {
+    const req = https.get(
+      url,
+      { headers: { accept: 'application/json', 'user-agent': 'alexa-berlin-departures' } },
+      (res) => {
+        const status = res.statusCode ?? 0;
+        if (status < 200 || status >= 300) {
+          res.resume();
+          reject(new Error(`BVG API HTTP ${status}`));
+          return;
+        }
+        const chunks: Buffer[] = [];
+        res.on('data', (c: Buffer) => chunks.push(c));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')));
+          } catch (e) {
+            reject(e);
+          }
+        });
+        res.on('error', reject);
+      },
+    );
+    req.setTimeout(timeoutMs, () => req.destroy(new Error(`BVG API timeout after ${timeoutMs}ms`)));
+    req.on('error', reject);
+  });
 
 export function buildUrl(): string {
   const config = getConfig();
@@ -60,18 +94,8 @@ export function selectBuses(raw: RawDeparture[], now: Date, count: number): Bus[
     .map((x) => ({ line: x.line, minutes: Math.max(0, Math.floor(x.ms / 60_000)) }));
 }
 
-export async function fetchNextBuses(now = new Date(), fetchFn: FetchFn = fetch): Promise<Bus[]> {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), getConfig().timeoutMs);
-  try {
-    const res = await fetchFn(buildUrl(), {
-      signal: ctrl.signal,
-      headers: { accept: 'application/json', 'user-agent': 'alexa-my-bus (personal skill)' },
-    });
-    if (!res.ok) throw new Error(`BVG API HTTP ${res.status}`);
-    const body = (await res.json()) as { departures?: RawDeparture[] };
-    return selectBuses(body.departures ?? [], now, getConfig().count);
-  } finally {
-    clearTimeout(timer);
-  }
+export async function fetchNextBuses(now = new Date(), getJson: GetJson = httpsGetJson): Promise<Bus[]> {
+  const { timeoutMs, count } = getConfig();
+  const body = (await getJson(buildUrl(), timeoutMs)) as { departures?: RawDeparture[] };
+  return selectBuses(body.departures ?? [], now, count);
 }

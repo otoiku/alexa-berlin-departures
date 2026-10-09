@@ -1,4 +1,8 @@
-import { buildUrl, fetchNextBuses, RawDeparture, selectBuses } from '../src/bvgClient';
+import { EventEmitter } from 'node:events';
+import * as https from 'node:https';
+
+jest.mock('node:https', () => ({ get: jest.fn() }));
+import { buildUrl, fetchNextBuses, httpsGetJson, RawDeparture, selectBuses } from '../src/bvgClient';
 import { resetConfig } from '../src/config';
 
 beforeAll(() => {
@@ -81,27 +85,59 @@ describe('fetchNextBuses', () => {
     expect(u.searchParams.get('subway')).toBe('false');
   });
 
-  it('parses the response', async () => {
-    const fake = jest.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ departures: [dep('a', '130', '2026-10-09T10:18:00+02:00')] }),
+  it('parses the response and passes the configured timeout', async () => {
+    const getJson = jest.fn().mockResolvedValue({ departures: [dep('a', '130', '2026-10-09T10:18:00+02:00')] });
+    await expect(fetchNextBuses(NOW, getJson)).resolves.toEqual([{ line: '130', minutes: 5 }]);
+    expect(getJson).toHaveBeenCalledWith(expect.stringContaining('/stops/900000000001/departures'), 3000);
+  });
+
+  it('propagates errors', async () => {
+    const getJson = jest.fn().mockRejectedValue(new Error('BVG API HTTP 503'));
+    await expect(fetchNextBuses(NOW, getJson)).rejects.toThrow('503');
+  });
+});
+
+describe('httpsGetJson', () => {
+  type Handler = (...a: any[]) => void;
+  function mockHttps(status: number, body: string, opts: { timeout?: boolean } = {}) {
+    const req = new EventEmitter() as EventEmitter & { setTimeout: jest.Mock; destroy: jest.Mock };
+    req.destroy = jest.fn((err: Error) => req.emit('error', err));
+    req.setTimeout = jest.fn((_ms: number, cb: Handler) => {
+      if (opts.timeout) setImmediate(cb);
     });
-    await expect(fetchNextBuses(NOW, fake as unknown as typeof fetch)).resolves.toEqual([{ line: '130', minutes: 5 }]);
+    (https.get as jest.Mock).mockImplementation(((_url: string, _o: unknown, cb: Handler) => {
+      if (!opts.timeout) {
+        const res = new EventEmitter() as EventEmitter & { statusCode: number; resume: jest.Mock };
+        res.statusCode = status;
+        res.resume = jest.fn();
+        setImmediate(() => {
+          cb(res);
+          res.emit('data', Buffer.from(body));
+          res.emit('end');
+        });
+      }
+      return req;
+    }) as any);
+  }
+  afterEach(() => (https.get as jest.Mock).mockReset());
+
+  it('resolves parsed JSON on 200', async () => {
+    mockHttps(200, '{"departures":[]}');
+    await expect(httpsGetJson('https://x', 3000)).resolves.toEqual({ departures: [] });
   });
 
-  it('throws on HTTP error', async () => {
-    const fake = jest.fn().mockResolvedValue({ ok: false, status: 503 });
-    await expect(fetchNextBuses(NOW, fake as unknown as typeof fetch)).rejects.toThrow('503');
+  it('rejects on non-2xx', async () => {
+    mockHttps(503, '');
+    await expect(httpsGetJson('https://x', 3000)).rejects.toThrow('HTTP 503');
   });
 
-  it('aborts on timeout', async () => {
-    jest.useFakeTimers();
-    const fake = jest.fn((_u: string, init: RequestInit) =>
-      new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new Error('aborted')))),
-    );
-    const p = fetchNextBuses(NOW, fake as unknown as typeof fetch);
-    jest.advanceTimersByTime(3000);
-    await expect(p).rejects.toThrow('aborted');
-    jest.useRealTimers();
+  it('rejects on invalid JSON', async () => {
+    mockHttps(200, 'not json');
+    await expect(httpsGetJson('https://x', 3000)).rejects.toThrow();
+  });
+
+  it('rejects on timeout', async () => {
+    mockHttps(200, '', { timeout: true });
+    await expect(httpsGetJson('https://x', 3000)).rejects.toThrow('timeout');
   });
 });
