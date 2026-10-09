@@ -29,7 +29,7 @@ function buildUrl() {
  * even when the trip's final destination name differs (loop lines, lines
  * continuing beyond the target). Do NOT filter by destination name.
  */
-function selectBuses(raw, now, count = 3) {
+function selectBuses(raw, now, count) {
     const seen = new Set();
     return raw
         .filter((d) => !d.cancelled)

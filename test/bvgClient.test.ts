@@ -20,7 +20,7 @@ describe('selectBuses', () => {
   it('uses realtime `when` (delay included) and computes floor minutes', () => {
     const r = selectBuses(
       [dep('a', '137', '2026-10-09T10:15:00+02:00', { plannedWhen: '2026-10-09T10:13:00+02:00' })],
-      NOW,
+      NOW, 3
     );
     expect(r).toEqual([{ line: '137', minutes: 2 }]);
   });
@@ -31,13 +31,13 @@ describe('selectBuses', () => {
         dep('late', 'M37', '2026-10-09T10:25:00+02:00', { plannedWhen: '2026-10-09T10:14:00+02:00' }),
         dep('ok', '130', '2026-10-09T10:18:00+02:00'),
       ],
-      NOW,
+      NOW, 3
     );
     expect(r.map((b) => b.line)).toEqual(['130', 'M37']);
   });
 
   it('falls back to plannedWhen when no realtime data', () => {
-    const r = selectBuses([dep('a', 'X37', null, { plannedWhen: '2026-10-09T10:22:30+02:00' })], NOW);
+    const r = selectBuses([dep('a', 'X37', null, { plannedWhen: '2026-10-09T10:22:30+02:00' })], NOW, 3);
     expect(r).toEqual([{ line: 'X37', minutes: 10 }]);
   });
 
@@ -53,7 +53,7 @@ describe('selectBuses', () => {
         dep('3', 'M37', '2026-10-09T10:30:00+02:00'),
         dep('4', 'X37', '2026-10-09T10:40:00+02:00'),
       ],
-      NOW,
+      NOW, 3
     );
     expect(r).toEqual([
       { line: '130', minutes: 0 },
@@ -66,7 +66,7 @@ describe('selectBuses', () => {
     // Trips whose final destination differs from the target stop must be kept.
     const r = selectBuses(
       [dep('a', '337', '2026-10-09T10:27:00+02:00'), dep('b', '137', '2026-10-09T10:15:00+02:00')],
-      NOW,
+      NOW, 3
     );
     expect(r.map((b) => b.line)).toEqual(['137', '337']);
   });

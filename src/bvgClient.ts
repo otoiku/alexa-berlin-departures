@@ -43,7 +43,7 @@ export function buildUrl(): string {
  * even when the trip's final destination name differs (loop lines, lines
  * continuing beyond the target). Do NOT filter by destination name.
  */
-export function selectBuses(raw: RawDeparture[], now: Date, count = 3): Bus[] {
+export function selectBuses(raw: RawDeparture[], now: Date, count: number): Bus[] {
   const seen = new Set<string>();
   return raw
     .filter((d) => !d.cancelled)

@@ -4,15 +4,15 @@
       "locales": {
         "ja-JP": {
           "name": "マイバス",
-          "summary": "次のバスを3本お知らせします",
-          "description": "登録したバス停から目的地への直通バスを、遅延込みで3本お知らせします（ベルリン BVG/VBB）。",
+          "summary": "次のバスをお知らせします",
+          "description": "登録したバス停から目的地への直通バスを、遅延込みで、設定した本数（初期値3本）お知らせします（ベルリン BVG/VBB）。",
           "examplePhrases": ["アレクサ、マイバスを開いて", "アレクサ、マイバスで次のバス"],
           "keywords": ["BVG", "バス", "ベルリン"]
         },
         "en-US": {
           "name": "My Bus",
-          "summary": "Tells you the next three buses",
-          "description": "Next three direct buses from your configured stop to your destination in Berlin (BVG/VBB), including delays.",
+          "summary": "Tells you the next buses",
+          "description": "Next direct buses (configurable, default 3) from your configured stop to your destination in Berlin (BVG/VBB), including delays.",
           "examplePhrases": ["Alexa, open my bus", "Alexa, ask my bus for the next bus"],
           "keywords": ["BVG", "bus", "Berlin"]
         }
