@@ -1,7 +1,7 @@
 {
   "interactionModel": {
     "languageModel": {
-      "invocationName": "マイバス",
+      "invocationName": "バス時刻表",
       "intents": [
         {
           "name": "NextBusIntent",

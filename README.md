@@ -2,7 +2,7 @@
 
 Say "Alexa, next bus" and Alexa tells you the next few (default: 3) **direct** buses from your stop to your destination in Berlin (BVG/VBB), as "in N minutes" with realtime delays included.
 
-Supported locales: `ja-JP` (invocation name: マイバス) and `en-US` (invocation name: my bus).
+Supported locales: `ja-JP` (invocation name: バス時刻表) and `en-US` (invocation name: my bus).
 Data source: [`v6.bvg.transport.rest`](https://v6.bvg.transport.rest) (community-run, no API key).
 
 ## Project layout
@@ -50,7 +50,7 @@ npm run smoke     # prints the ja/en speech using the real API (needs stop IDs)
 2. Paste `skill-package/interactionModels/custom/ja-JP.json` / `en-US.json` into each locale's JSON editor, save and build.
 3. Run `npm run build` and upload the contents of `lambda/` (`index.js`, `package.json`, `dist/`, **`stops.json`**) via the Code tab, or push them to the Alexa-hosted git repository.
    Note: `stops.json` is git-ignored here, so it must be added explicitly to the Alexa-hosted repository (that repository is private).
-4. Enable testing in the Test tab and try "open my bus" / 「マイバスを開いて」.
+4. Enable testing in the Test tab and try "open my bus" / 「バス時刻表を開いて」.
 
 ## Deploy with ask-cli (git push)
 One-time setup:
@@ -71,7 +71,7 @@ The script copies `index.js`, `package.json`, `stops.json` and `dist/` into the 
 ## Routine ("Alexa, next bus")
 A custom skill cannot be launched by "next bus" alone. Create a Routine in the Alexa app:
 - When: voice, "next bus" (or 「次のバス」)
-- Action: Custom, "open my bus" (or 「マイバスを開いて」)
+- Action: Custom, "open my bus" (or 「バス時刻表を開いて」)
 
 ## Notes
 - The API's `direction` filter is reliable: every returned trip was verified (via `/trips/{id}`) to stop at the target after the origin, even when its final destination name is different (loop lines, lines continuing beyond the target). Do not filter by destination name.

@@ -3,10 +3,10 @@
     "publishingInformation": {
       "locales": {
         "ja-JP": {
-          "name": "マイバス",
+          "name": "バス時刻表",
           "summary": "次のバスをお知らせします",
           "description": "登録したバス停から目的地への直通バスを、遅延込みで、設定した本数（初期値3本）お知らせします（ベルリン BVG/VBB）。",
-          "examplePhrases": ["アレクサ、マイバスを開いて", "アレクサ、マイバスで次のバス"],
+          "examplePhrases": ["アレクサ、バス時刻表を開いて", "アレクサ、バス時刻表で次のバス"],
           "keywords": ["BVG", "バス", "ベルリン"]
         },
         "en-US": {
